@@ -1,0 +1,56 @@
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+
+plugins {
+    id 'org.springframework.boot' version '2.3.1.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'com.google.cloud.tools.jib' version '2.4.0'
+    id 'java'
+    id 'idea'
+}
+
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'java'
+apply plugin: 'idea'
+
+group 'org.arydz.usermanagement'
+version '1.0-SNAPSHOT'
+sourceCompatibility = '11'
+
+// Google jib has some issues with timing, without it you would see a very old creation date
+static def getDate() {
+    DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    Date date = new Date()
+    return df1.format(date)
+}
+
+jib.to.image = 'arydz/user-service-image'
+jib.container.creationTime = getDate()
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    String hibernateVersion = "6.1.5.Final"
+    String lombokVersion = "1.18.12"
+    String guavaVersion = "30.0-jre"
+
+    // Spring
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+
+    // Database
+    implementation "org.hibernate.validator:hibernate-validator:$hibernateVersion"
+    implementation "org.flywaydb:flyway-core:6.5.2"
+    implementation 'mysql:mysql-connector-java:8.0.22'
+
+    // Development tools
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "com.google.guava:guava:$guavaVersion"
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
